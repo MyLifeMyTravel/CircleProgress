@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.littlejie.app.MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btn_reset_all"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="重置" />
+
+        <com.littlejie.circleprogress.CircleProgress
+            android:id="@+id/circle_progress_bar1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            app:antiAlias="true"
+            app:arcWidth="@dimen/small"
+            app:bgArcColor="@color/colorAccent"
+            app:bgArcWidth="@dimen/small"
+            app:hint="截止当前已走"
+            app:hintSize="15sp"
+            app:maxValue="10000"
+            app:startAngle="135"
+            app:sweepAngle="270"
+            app:unit="步"
+            app:unitSize="15sp"
+            app:value="10000"
+            app:valueSize="25sp" />
+
+        <com.littlejie.circleprogress.CircleProgress
+            android:id="@+id/circle_progress_bar2"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center_horizontal"
+            app:antiAlias="true"
+            app:arcColor1="@color/colorPrimaryDark"
+            app:arcColor2="@color/colorPrimary"
+            app:arcColor3="@android:color/holo_blue_bright"
+            app:arcWidth="@dimen/small"
+            app:bgArcColor="@color/colorAccent"
+            app:bgArcWidth="@dimen/small"
+            app:hint="百分比"
+            app:hintSize="@dimen/text_size_25"
+            app:maxValue="100"
+            app:startAngle="135"
+            app:sweepAngle="270"
+            app:unit="%"
+            app:unitSize="@dimen/text_size_25"
+            app:value="60"
+            app:valueSize="@dimen/text_size_35" />
+
+        <com.littlejie.circleprogress.CircleProgress
+            android:id="@+id/circle_progress_bar3"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center_horizontal"
+            app:antiAlias="true"
+            app:arcWidth="@dimen/small"
+            app:bgArcColor="@color/colorAccent"
+            app:bgArcWidth="@dimen/small"
+            app:hint="当前进度"
+            app:hintSize="@dimen/text_size_25"
+            app:maxValue="100"
+            app:startAngle="270"
+            app:sweepAngle="360"
+            app:unit="%"
+            app:unitSize="@dimen/text_size_25"
+            app:value="50"
+            app:valueSize="@dimen/text_size_35" />
+    </LinearLayout>
+</ScrollView>
