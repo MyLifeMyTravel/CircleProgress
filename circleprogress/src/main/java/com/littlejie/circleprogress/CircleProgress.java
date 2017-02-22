@@ -381,9 +381,7 @@ public class CircleProgress extends View {
      * 重置
      */
     public void reset() {
-        mValue = 0.0f;
-        mPercent = 0.0f;
-        startAnimator(0.0f, 0.0f, 0L);
+        startAnimator(mPercent, 0.0f, 1000L);
     }
 
     @Override

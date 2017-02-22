@@ -44,8 +44,8 @@
             android:layout_gravity="center_horizontal"
             app:antiAlias="true"
             app:arcColor1="@color/colorPrimaryDark"
-            app:arcColor2="@color/colorPrimary"
-            app:arcColor3="@android:color/holo_blue_bright"
+            app:arcColor2="@android:color/holo_blue_bright"
+            app:arcColor3="@android:color/holo_blue_light"
             app:arcWidth="@dimen/small"
             app:bgArcColor="@color/colorAccent"
             app:bgArcWidth="@dimen/small"
@@ -56,7 +56,7 @@
             app:sweepAngle="270"
             app:unit="%"
             app:unitSize="@dimen/text_size_25"
-            app:value="60"
+            app:value="75"
             app:valueSize="@dimen/text_size_35" />
 
         <com.littlejie.circleprogress.CircleProgress
@@ -75,7 +75,7 @@
             app:sweepAngle="360"
             app:unit="%"
             app:unitSize="@dimen/text_size_25"
-            app:value="50"
+            app:value="100"
             app:valueSize="@dimen/text_size_35" />
     </LinearLayout>
 </ScrollView>
