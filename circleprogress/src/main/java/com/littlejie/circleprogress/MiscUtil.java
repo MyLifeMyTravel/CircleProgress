@@ -39,4 +39,8 @@ public class MiscUtil {
         float density = context.getResources().getDisplayMetrics().density;
         return (int) (dip * density + 0.5f * (dip >= 0 ? 1 : -1));
     }
+
+    public static String getPrecisionFormat(int precision) {
+        return "%." + precision + "f";
+    }
 }

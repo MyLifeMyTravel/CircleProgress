@@ -39,7 +39,7 @@
 
         <com.littlejie.circleprogress.CircleProgress
             android:id="@+id/circle_progress_bar2"
-            android:layout_width="200dp"
+            android:layout_width="400dp"
             android:layout_height="200dp"
             android:layout_gravity="center_horizontal"
             app:antiAlias="true"
@@ -66,7 +66,7 @@
             android:layout_gravity="center_horizontal"
             app:antiAlias="true"
             app:arcWidth="@dimen/small"
-            app:bgArcColor="@color/colorAccent"
+            app:bgArcColor="@android:color/darker_gray"
             app:bgArcWidth="@dimen/small"
             app:hint="当前进度"
             app:hintSize="@dimen/text_size_25"
@@ -77,5 +77,24 @@
             app:unitSize="@dimen/text_size_25"
             app:value="100"
             app:valueSize="@dimen/text_size_35" />
+
+        <com.littlejie.circleprogress.DialProgress
+            android:id="@+id/dial_progress_bar"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center_horizontal"
+            android:padding="@dimen/medium"
+            app:animTime="1000"
+            app:arcWidth="@dimen/large"
+            app:dialIntervalDegree="3"
+            app:dialWidth="2dp"
+            app:maxValue="300"
+            app:startAngle="135"
+            app:sweepAngle="270"
+            app:unit="km/h"
+            app:unitSize="@dimen/text_size_25"
+            app:value="300"
+            app:valueSize="@dimen/text_size_35" />
+
     </LinearLayout>
 </ScrollView>

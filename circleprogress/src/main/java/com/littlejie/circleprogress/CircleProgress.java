@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.SweepGradient;
@@ -16,7 +15,7 @@ import android.util.Log;
 import android.view.View;
 
 /**
- * 类似 QQ 中计步器 UI
+ * 圆形进度条，类似 QQ 健康中运动步数的 UI 控件
  * Created by littlejie on 2017/2/21.
  */
 
@@ -56,8 +55,6 @@ public class CircleProgress extends View {
     private float mArcWidth;
     private float mStartAngle, mSweepAngle;
     private RectF mRectF;
-    //渐变
-    private Matrix mRotateMatrix;
     //渐变的颜色是360度，如果只显示270，那么则会缺失部分颜色
     private SweepGradient mSweepGradient;
     private int[] mGradientColors = {Color.GREEN, Color.YELLOW, Color.RED};
@@ -74,7 +71,7 @@ public class CircleProgress extends View {
     private float mBgArcWidth;
 
     //圆心坐标，半径
-    private float mFloatX, mFloatY, mRadius;
+    private float mCenterX, mCenterY, mRadius;
     //在屏幕上的坐标
     private int[] mLocationOnScreen = new int[2];
 
@@ -97,23 +94,23 @@ public class CircleProgress extends View {
     private void initAttrs(AttributeSet attrs) {
         TypedArray typedArray = mContext.obtainStyledAttributes(attrs, R.styleable.CircleProgressBar);
 
-        antiAlias = typedArray.getBoolean(R.styleable.CircleProgressBar_antiAlias, false);
+        antiAlias = typedArray.getBoolean(R.styleable.CircleProgressBar_antiAlias, Constant.ANTI_ALIAS);
 
         mHint = typedArray.getString(R.styleable.CircleProgressBar_hint);
         mHintColor = typedArray.getColor(R.styleable.CircleProgressBar_hintColor, Color.BLACK);
-        mHintSize = typedArray.getDimension(R.styleable.CircleProgressBar_hintSize, 15);
+        mHintSize = typedArray.getDimension(R.styleable.CircleProgressBar_hintSize, Constant.DEFAULT_HINT_SIZE);
 
-        mValue = typedArray.getFloat(R.styleable.CircleProgressBar_value, 0);
-        mMaxValue = typedArray.getFloat(R.styleable.CircleProgressBar_maxValue, 0);
+        mValue = typedArray.getFloat(R.styleable.CircleProgressBar_value, Constant.DEFAULT_VALUE);
+        mMaxValue = typedArray.getFloat(R.styleable.CircleProgressBar_maxValue, Constant.DEFAULT_MAX_VALUE);
         //内容数值精度格式
         mPrecision = typedArray.getInt(R.styleable.CircleProgressBar_precision, 0);
-        mPrecisionFormat = getPrecisionFormat(mPrecision);
+        mPrecisionFormat = MiscUtil.getPrecisionFormat(mPrecision);
         mValueColor = typedArray.getColor(R.styleable.CircleProgressBar_valueColor, Color.BLACK);
-        mValueSize = typedArray.getDimension(R.styleable.CircleProgressBar_valueSize, 60);
+        mValueSize = typedArray.getDimension(R.styleable.CircleProgressBar_valueSize, Constant.DEFAULT_VALUE_SIZE);
 
         mUnit = typedArray.getString(R.styleable.CircleProgressBar_unit);
         mUnitColor = typedArray.getColor(R.styleable.CircleProgressBar_unitColor, Color.BLACK);
-        mUnitSize = typedArray.getDimension(R.styleable.CircleProgressBar_unitSize, 15);
+        mUnitSize = typedArray.getDimension(R.styleable.CircleProgressBar_unitSize, Constant.DEFAULT_UNIT_SIZE);
 
         // 设置渐变色
         mArcColor1 = typedArray.getColor(R.styleable.CircleProgressBar_arcColor1, Color.GREEN);
@@ -121,21 +118,17 @@ public class CircleProgress extends View {
         mArcColor3 = typedArray.getColor(R.styleable.CircleProgressBar_arcColor3, Color.RED);
         mGradientColors = new int[]{mArcColor1, mArcColor2, mArcColor3};
 
-        mArcWidth = typedArray.getDimension(R.styleable.CircleProgressBar_arcWidth, 15);
-        mStartAngle = typedArray.getFloat(R.styleable.CircleProgressBar_startAngle, 270);
-        mSweepAngle = typedArray.getFloat(R.styleable.CircleProgressBar_sweepAngle, 360);
+        mArcWidth = typedArray.getDimension(R.styleable.CircleProgressBar_arcWidth, Constant.DEFAULT_ARC_WIDTH);
+        mStartAngle = typedArray.getFloat(R.styleable.CircleProgressBar_startAngle, Constant.DEFAULT_START_ANGLE);
+        mSweepAngle = typedArray.getFloat(R.styleable.CircleProgressBar_sweepAngle, Constant.DEFAULT_SWEEP_ANGLE);
 
         mBgArcColor = typedArray.getColor(R.styleable.CircleProgressBar_bgArcColor, Color.WHITE);
-        mBgArcWidth = typedArray.getDimension(R.styleable.CircleProgressBar_bgArcWidth, 15);
+        mBgArcWidth = typedArray.getDimension(R.styleable.CircleProgressBar_bgArcWidth, Constant.DEFAULT_ARC_WIDTH);
 
         //mPercent = typedArray.getFloat(R.styleable.CircleProgressBar_percent, 0);
-        mAnimTime = typedArray.getInt(R.styleable.CircleProgressBar_animTime, 1000);
+        mAnimTime = typedArray.getInt(R.styleable.CircleProgressBar_animTime, Constant.DEFAULT_ANIM_TIME);
 
         typedArray.recycle();
-    }
-
-    private String getPrecisionFormat(int precision) {
-        return "%." + precision + "f";
     }
 
     private void initPaint() {
@@ -165,7 +158,6 @@ public class CircleProgress extends View {
 
         mArcPaint = new Paint();
         mArcPaint.setAntiAlias(antiAlias);
-        mArcPaint.setColor(mArcColor1);
         // 设置画笔的样式，为FILL，FILL_OR_STROKE，或STROKE
         mArcPaint.setStyle(Paint.Style.STROKE);
         // 设置画笔粗细
@@ -173,7 +165,6 @@ public class CircleProgress extends View {
         // 当画笔样式为STROKE或FILL_OR_STROKE时，设置笔刷的图形样式，如圆形样式
         // Cap.ROUND,或方形样式 Cap.SQUARE
         mArcPaint.setStrokeCap(Paint.Cap.ROUND);
-        mRotateMatrix = new Matrix();
 
         mBgArcPaint = new Paint();
         mBgArcPaint.setAntiAlias(antiAlias);
@@ -186,28 +177,25 @@ public class CircleProgress extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        //设置默认内边距，防止圆弧与边界重叠
-        int padding = MiscUtil.dipToPx(mContext, 5);
-        setPadding(padding, padding, padding, padding);
         //因为是画圆，所以宽高相等
         int measuredWidth = MiscUtil.measure(widthMeasureSpec, mDefaultSize);
         int measuredHeight = MiscUtil.measure(heightMeasureSpec, mDefaultSize);
-        //求最小值作为实际值
-        int size = Math.min(measuredWidth, measuredHeight);
-        setMeasuredDimension(measuredWidth + getPaddingLeft() + getPaddingRight(),
-                measuredHeight + getPaddingTop() + getPaddingBottom());
-        //获取圆的相关参数
-        mFloatX = mLocationOnScreen[0] + size / 2 + getPaddingLeft();
-        mFloatY = mLocationOnScreen[1] + size / 2 + getPaddingTop();
+        setMeasuredDimension(measuredWidth, measuredHeight);
         //求圆弧和背景圆弧的最大宽度
         float maxArcWidth = Math.max(mArcWidth, mBgArcWidth);
-        //减去圆弧的宽度，否则会造成部分圆弧绘制在外围，通过clipPadding属性可以解决
-        mRadius = size / 2 - maxArcWidth;
+        //求最小值作为实际值
+        int minSize = Math.min(getMeasuredWidth() - getPaddingLeft() - getPaddingRight() - 2 * (int) maxArcWidth,
+                getMeasuredHeight() - getPaddingTop() - getPaddingBottom() - 2 * (int) maxArcWidth);
+        //减去圆弧的宽度，否则会造成部分圆弧绘制在外围
+        mRadius = minSize / 2;
+        //获取圆的相关参数
+        mCenterX = getMeasuredWidth() / 2;
+        mCenterY = getMeasuredHeight() / 2;
         //绘制圆弧的边界
-        mRectF.left = mLocationOnScreen[0] + getPaddingLeft();
-        mRectF.top = mLocationOnScreen[1] + getPaddingTop();
-        mRectF.right = mRectF.left + size;
-        mRectF.bottom = mRectF.top + size;
+        mRectF.left = mCenterX - mRadius - maxArcWidth / 2;
+        mRectF.top = mCenterY - mRadius - maxArcWidth / 2;
+        mRectF.right = mCenterX + mRadius + maxArcWidth / 2;
+        mRectF.bottom = mCenterY + mRadius + maxArcWidth / 2;
         updateArcPaint();
     }
 
@@ -226,32 +214,35 @@ public class CircleProgress extends View {
     private void drawText(Canvas canvas) {
         // 计算文字宽度，由于Paint已设置为居中绘制，故此处不需要重新计算
         // float textWidth = mValuePaint.measureText(mValue.toString());
-        // float x = mFloatX - textWidth / 2;
-        float y = mFloatY - (mValuePaint.descent() + mValuePaint.ascent()) / 2;
-        canvas.drawText(String.format(mPrecisionFormat, mValue), mFloatX, y, mValuePaint);
+        // float x = mCenterX - textWidth / 2;
+        float y = mCenterY - (mValuePaint.descent() + mValuePaint.ascent()) / 2;
+        canvas.drawText(String.format(mPrecisionFormat, mValue), mCenterX, y, mValuePaint);
 
         if (mHint != null) {
-            float hy = mFloatY * 2 / 3 - (mHintPaint.descent() + mHintPaint.ascent()) / 2;
-            canvas.drawText(mHint.toString(), mFloatX, hy, mHintPaint);
+            float hy = mCenterY * 2 / 3 - (mHintPaint.descent() + mHintPaint.ascent()) / 2;
+            canvas.drawText(mHint.toString(), mCenterX, hy, mHintPaint);
         }
 
         if (mUnit != null) {
-            float uy = mFloatY * 4 / 3 - (mUnitPaint.descent() + mUnitPaint.ascent()) / 2;
-            canvas.drawText(mUnit.toString(), mFloatX, uy, mUnitPaint);
+            float uy = mCenterY * 4 / 3 - (mUnitPaint.descent() + mUnitPaint.ascent()) / 2;
+            canvas.drawText(mUnit.toString(), mCenterX, uy, mUnitPaint);
         }
     }
 
     private void drawArc(Canvas canvas) {
         // 绘制背景圆弧
         // 从进度圆弧结束的地方开始重新绘制，优化性能
+        canvas.save();
         float currentAngle = mSweepAngle * mPercent;
-        canvas.drawArc(mRectF, mStartAngle, mSweepAngle, false, mBgArcPaint);
+        canvas.rotate(mStartAngle, mCenterX, mCenterY);
+        canvas.drawArc(mRectF, currentAngle, mSweepAngle - currentAngle + 2, false, mBgArcPaint);
         // 第一个参数 oval 为 RectF 类型，即圆弧显示区域
         // startAngle 和 sweepAngle  均为 float 类型，分别表示圆弧起始角度和圆弧度数
         // 3点钟方向为0度，顺时针递增
         // 如果 startAngle < 0 或者 > 360,则相当于 startAngle % 360
         // useCenter:如果为True时，在绘制圆弧时将圆心包括在内，通常用来绘制扇形
-        canvas.drawArc(mRectF, mStartAngle, currentAngle, false, mArcPaint);
+        canvas.drawArc(mRectF, 2, currentAngle, false, mArcPaint);
+        canvas.restore();
     }
 
     /**
@@ -259,10 +250,7 @@ public class CircleProgress extends View {
      */
     private void updateArcPaint() {
         // 设置渐变
-        mSweepGradient = new SweepGradient(mFloatX, mFloatY, mGradientColors, null);
-        // 矩阵变化，-5是因为开始颜色可能会与结束颜色重叠
-        mRotateMatrix.setRotate(mStartAngle - 5, mFloatX, mFloatY);
-        mSweepGradient.setLocalMatrix(mRotateMatrix);
+        mSweepGradient = new SweepGradient(mCenterX, mCenterY, mGradientColors, null);
         mArcPaint.setShader(mSweepGradient);
     }
 
@@ -305,8 +293,8 @@ public class CircleProgress extends View {
     }
 
     private void startAnimator(float start, float end, long animTime) {
-        mAnimator.setDuration(animTime);
         mAnimator = ValueAnimator.ofFloat(start, end);
+        mAnimator.setDuration(animTime);
         mAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -352,7 +340,7 @@ public class CircleProgress extends View {
 
     public void setPrecision(int precision) {
         mPrecision = precision;
-        mPrecisionFormat = getPrecisionFormat(precision);
+        mPrecisionFormat = MiscUtil.getPrecisionFormat(precision);
     }
 
     public int[] getGradientColors() {
