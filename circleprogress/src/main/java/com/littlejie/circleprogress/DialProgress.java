@@ -7,12 +7,16 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.SweepGradient;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+
+import com.littlejie.circleprogress.utils.Constant;
+import com.littlejie.circleprogress.utils.MiscUtil;
 
 /**
  * 带有刻度的圆形进度条
@@ -25,7 +29,7 @@ public class DialProgress extends View {
     private Context mContext;
 
     //圆心坐标
-    private float mCenterX, mCenterY;
+    private Point mCenterPoint;
     private float mRadius;
 
     private boolean antiAlias;
@@ -75,8 +79,9 @@ public class DialProgress extends View {
 
     private void init(Context context, AttributeSet attrs) {
         mContext = context;
-        mDefaultSize = MiscUtil.dipToPx(context, 150);
+        mDefaultSize = MiscUtil.dipToPx(context, Constant.DEFAULT_SIZE);
         mRectF = new RectF();
+        mCenterPoint = new Point();
         initConfig(context, attrs);
         initPaint();
         setValue(mValue);
@@ -172,27 +177,36 @@ public class DialProgress extends View {
     private void updateArcPaint() {
         // 设置渐变
         // 渐变的颜色是360度，如果只显示270，那么则会缺失部分颜色
-        SweepGradient sweepGradient = new SweepGradient(mCenterX, mCenterY, mGradientColors, null);
+        SweepGradient sweepGradient = new SweepGradient(mCenterPoint.x, mCenterPoint.y, mGradientColors, null);
         mArcPaint.setShader(sweepGradient);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int measuredWidth = MiscUtil.measure(widthMeasureSpec, mDefaultSize);
-        int measuredHeight = MiscUtil.measure(heightMeasureSpec, mDefaultSize);
-        setMeasuredDimension(measuredWidth, measuredHeight);
+        setMeasuredDimension(MiscUtil.measure(widthMeasureSpec, mDefaultSize),
+                MiscUtil.measure(heightMeasureSpec, mDefaultSize));
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        Log.d(TAG, "onSizeChanged: w = " + w + "; h = " + h + "; oldw = " + oldw + "; oldh = " + oldh);
         int minSize = Math.min(getMeasuredWidth() - getPaddingLeft() - getPaddingRight() - 2 * (int) mArcWidth,
                 getMeasuredHeight() - getPaddingTop() - getPaddingBottom() - 2 * (int) mArcWidth);
         mRadius = minSize / 2;
-        mCenterX = getMeasuredWidth() / 2;
-        mCenterY = getMeasuredHeight() / 2;
+        mCenterPoint.x = getMeasuredWidth() / 2;
+        mCenterPoint.y = getMeasuredHeight() / 2;
         //绘制圆弧的边界
-        mRectF.left = mCenterX - mRadius - mArcWidth / 2;
-        mRectF.top = mCenterY - mRadius - mArcWidth / 2;
-        mRectF.right = mCenterX + mRadius + mArcWidth / 2;
-        mRectF.bottom = mCenterY + mRadius + mArcWidth / 2;
+        mRectF.left = mCenterPoint.x - mRadius - mArcWidth / 2;
+        mRectF.top = mCenterPoint.y - mRadius - mArcWidth / 2;
+        mRectF.right = mCenterPoint.x + mRadius + mArcWidth / 2;
+        mRectF.bottom = mCenterPoint.y + mRadius + mArcWidth / 2;
         updateArcPaint();
+        Log.d(TAG, "onMeasure: 控件大小 = " + "(" + getMeasuredWidth() + ", " + getMeasuredHeight() + ")"
+                + ";圆心坐标 = " + mCenterPoint.toString()
+                + ";圆半径 = " + mRadius
+                + ";圆的外接矩形 = " + mRectF.toString());
     }
 
     @Override
@@ -208,7 +222,7 @@ public class DialProgress extends View {
         // 从进度圆弧结束的地方开始重新绘制，优化性能
         float currentAngle = mSweepAngle * mPercent;
         canvas.save();
-        canvas.rotate(mStartAngle, mCenterX, mCenterY);
+        canvas.rotate(mStartAngle, mCenterPoint.x, mCenterPoint.y);
         canvas.drawArc(mRectF, currentAngle, mSweepAngle - currentAngle, false, mBgArcPaint);
         // 第一个参数 oval 为 RectF 类型，即圆弧显示区域
         // startAngle 和 sweepAngle  均为 float 类型，分别表示圆弧起始角度和圆弧度数
@@ -222,21 +236,21 @@ public class DialProgress extends View {
     private void drawDial(Canvas canvas) {
         int total = (int) (mSweepAngle / mDialIntervalDegree);
         canvas.save();
-        canvas.rotate(mStartAngle, mCenterX, mCenterY);
+        canvas.rotate(mStartAngle, mCenterPoint.x, mCenterPoint.y);
         for (int i = 0; i <= total; i++) {
-            canvas.drawLine(mCenterX + mRadius, mCenterY, mCenterX + mRadius + mArcWidth, mCenterY, mDialPaint);
-            canvas.rotate(mDialIntervalDegree, mCenterX, mCenterY);
+            canvas.drawLine(mCenterPoint.x + mRadius, mCenterPoint.y, mCenterPoint.x + mRadius + mArcWidth, mCenterPoint.y, mDialPaint);
+            canvas.rotate(mDialIntervalDegree, mCenterPoint.x, mCenterPoint.y);
         }
         canvas.restore();
     }
 
     private void drawText(Canvas canvas) {
-        float y = mCenterY - (mValuePaint.descent() + mValuePaint.ascent()) / 2;
-        canvas.drawText(String.format(mPrecisionFormat, mValue), mCenterX, y, mValuePaint);
+        float y = mCenterPoint.y - (mValuePaint.descent() + mValuePaint.ascent()) / 2;
+        canvas.drawText(String.format(mPrecisionFormat, mValue), mCenterPoint.x, y, mValuePaint);
 
         if (mUnit != null) {
-            float uy = mCenterY * 4 / 3 - (mUnitPaint.descent() + mUnitPaint.ascent()) / 2;
-            canvas.drawText(mUnit.toString(), mCenterX, uy, mUnitPaint);
+            float uy = mCenterPoint.y * 4 / 3 - (mUnitPaint.descent() + mUnitPaint.ascent()) / 2;
+            canvas.drawText(mUnit.toString(), mCenterPoint.x, uy, mUnitPaint);
         }
     }
 

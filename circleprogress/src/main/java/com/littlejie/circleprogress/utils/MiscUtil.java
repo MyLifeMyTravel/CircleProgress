@@ -1,4 +1,4 @@
-package com.littlejie.circleprogress;
+package com.littlejie.circleprogress.utils;
 
 import android.content.Context;
 import android.view.View;
@@ -40,6 +40,12 @@ public class MiscUtil {
         return (int) (dip * density + 0.5f * (dip >= 0 ? 1 : -1));
     }
 
+    /**
+     * 获取数值精度格式化字符串
+     *
+     * @param precision
+     * @return
+     */
     public static String getPrecisionFormat(int precision) {
         return "%." + precision + "f";
     }

@@ -23,7 +23,7 @@
     <attr name="arcColor1" format="color|reference" />
     <attr name="arcColor2" format="color|reference" />
     <attr name="arcColor3" format="color|reference" />
-    <!-- 背景圆弧颜色 -->
+    <!-- 背景圆弧颜色，默认白色 -->
     <attr name="bgArcColor" format="color|reference" />
     <!-- 圆弧宽度 -->
     <attr name="arcWidth" format="dimension" />
@@ -84,5 +84,38 @@
         <attr name="bgArcColor" />
         <!-- 刻度线颜色 -->
         <attr name="dialColor" format="color|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="WaveProgress">
+        <!-- 是否开启抗锯齿 -->
+        <attr name="antiAlias" />
+        <!-- 深色水波动画时间 -->
+        <attr name="darkWaveAnimTime" format="integer" />
+        <!-- 浅色水波动画时间 -->
+        <attr name="lightWaveAnimTime" format="integer" />
+        <!-- 最大值 -->
+        <attr name="maxValue" />
+        <!-- 当前值 -->
+        <attr name="value" />
+        <!-- 圆环宽度 -->
+        <attr name="circleWidth" format="dimension" />
+        <!-- 圆环颜色 -->
+        <attr name="circleColor" format="color|reference" />
+        <!-- 背景圆环颜色 -->
+        <attr name="bgCircleColor" format="color|reference" />
+        <!-- 水波数量 -->
+        <attr name="waveNum" format="integer" />
+        <!-- 水波高度 -->
+        <attr name="waveHeight" format="dimension" />
+        <!-- 深色水波颜色 -->
+        <attr name="darkWaveColor" format="color|reference" />
+        <!-- 是否显示浅色水波 -->
+        <attr name="showLightWave" format="boolean" />
+        <!-- 浅色水波颜色 -->
+        <attr name="lightWaveColor" format="color|reference" />
+        <!--<attr name="direction" format="enum">-->
+            <!--<enum name="left2right" value="L2R" />-->
+            <!--<enum name="right2left" value="R2L" />-->
+        <!--</attr>-->
     </declare-styleable>
 </resources>

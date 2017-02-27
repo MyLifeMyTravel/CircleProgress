@@ -8,6 +8,7 @@ import android.widget.Button;
 
 import com.littlejie.circleprogress.CircleProgress;
 import com.littlejie.circleprogress.DialProgress;
+import com.littlejie.circleprogress.WaveProgress;
 
 import java.util.Random;
 
@@ -18,6 +19,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button mBtnResetAll;
     private CircleProgress mCircleProgress1, mCircleProgress2, mCircleProgress3;
     private DialProgress mDialProgress;
+    private WaveProgress mWaveProgress;
     private Random mRandom;
 
     @Override
@@ -30,12 +32,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mCircleProgress2 = (CircleProgress) findViewById(R.id.circle_progress_bar2);
         mCircleProgress3 = (CircleProgress) findViewById(R.id.circle_progress_bar3);
         mDialProgress = (DialProgress) findViewById(R.id.dial_progress_bar);
+        mWaveProgress = (WaveProgress) findViewById(R.id.wave_progress_bar);
 
         mBtnResetAll.setOnClickListener(this);
         mCircleProgress1.setOnClickListener(this);
         mCircleProgress2.setOnClickListener(this);
         mCircleProgress3.setOnClickListener(this);
         mDialProgress.setOnClickListener(this);
+        mWaveProgress.setOnClickListener(this);
 
         mRandom = new Random();
     }
@@ -62,6 +66,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.dial_progress_bar:
                 mDialProgress.setValue(mRandom.nextFloat() * mDialProgress.getMaxValue());
+                break;
+            case R.id.wave_progress_bar:
+                mWaveProgress.startWaveAnimator();
+                mWaveProgress.setValue(mRandom.nextFloat() * mWaveProgress.getMaxValue());
                 break;
         }
     }

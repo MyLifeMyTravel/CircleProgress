@@ -7,6 +7,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.SweepGradient;
 import android.graphics.Typeface;
@@ -14,6 +15,9 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+
+import com.littlejie.circleprogress.utils.Constant;
+import com.littlejie.circleprogress.utils.MiscUtil;
 
 /**
  * 圆形进度条，类似 QQ 健康中运动步数的 UI 控件
@@ -71,7 +75,8 @@ public class CircleProgress extends View {
     private float mBgArcWidth;
 
     //圆心坐标，半径
-    private float mCenterX, mCenterY, mRadius;
+    private Point mCenterPoint;
+    private float mRadius;
 
     public CircleProgress(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -80,9 +85,10 @@ public class CircleProgress extends View {
 
     private void init(Context context, AttributeSet attrs) {
         mContext = context;
-        mDefaultSize = MiscUtil.dipToPx(mContext, 150);
+        mDefaultSize = MiscUtil.dipToPx(mContext, Constant.DEFAULT_SIZE);
         mAnimator = new ValueAnimator();
         mRectF = new RectF();
+        mCenterPoint = new Point();
         initAttrs(attrs);
         initPaint();
         setValue(mValue);
@@ -189,26 +195,34 @@ public class CircleProgress extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        //因为是画圆，所以宽高相等
-        int measuredWidth = MiscUtil.measure(widthMeasureSpec, mDefaultSize);
-        int measuredHeight = MiscUtil.measure(heightMeasureSpec, mDefaultSize);
-        setMeasuredDimension(measuredWidth, measuredHeight);
+        setMeasuredDimension(MiscUtil.measure(widthMeasureSpec, mDefaultSize),
+                MiscUtil.measure(heightMeasureSpec, mDefaultSize));
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        Log.d(TAG, "onSizeChanged: w = " + w + "; h = " + h + "; oldw = " + oldw + "; oldh = " + oldh);
         //求圆弧和背景圆弧的最大宽度
         float maxArcWidth = Math.max(mArcWidth, mBgArcWidth);
         //求最小值作为实际值
-        int minSize = Math.min(getMeasuredWidth() - getPaddingLeft() - getPaddingRight() - 2 * (int) maxArcWidth,
-                getMeasuredHeight() - getPaddingTop() - getPaddingBottom() - 2 * (int) maxArcWidth);
+        int minSize = Math.min(w - getPaddingLeft() - getPaddingRight() - 2 * (int) maxArcWidth,
+                h - getPaddingTop() - getPaddingBottom() - 2 * (int) maxArcWidth);
         //减去圆弧的宽度，否则会造成部分圆弧绘制在外围
         mRadius = minSize / 2;
         //获取圆的相关参数
-        mCenterX = getMeasuredWidth() / 2;
-        mCenterY = getMeasuredHeight() / 2;
+        mCenterPoint.x = w / 2;
+        mCenterPoint.y = h / 2;
         //绘制圆弧的边界
-        mRectF.left = mCenterX - mRadius - maxArcWidth / 2;
-        mRectF.top = mCenterY - mRadius - maxArcWidth / 2;
-        mRectF.right = mCenterX + mRadius + maxArcWidth / 2;
-        mRectF.bottom = mCenterY + mRadius + maxArcWidth / 2;
+        mRectF.left = mCenterPoint.x - mRadius - maxArcWidth / 2;
+        mRectF.top = mCenterPoint.y - mRadius - maxArcWidth / 2;
+        mRectF.right = mCenterPoint.x + mRadius + maxArcWidth / 2;
+        mRectF.bottom = mCenterPoint.y + mRadius + maxArcWidth / 2;
         updateArcPaint();
+        Log.d(TAG, "onSizeChanged: 控件大小 = " + "(" + w + ", " + h + ")"
+                + "圆心坐标 = " + mCenterPoint.toString()
+                + ";圆半径 = " + mRadius
+                + ";圆的外接矩形 = " + mRectF.toString());
     }
 
     @Override
@@ -226,18 +240,18 @@ public class CircleProgress extends View {
     private void drawText(Canvas canvas) {
         // 计算文字宽度，由于Paint已设置为居中绘制，故此处不需要重新计算
         // float textWidth = mValuePaint.measureText(mValue.toString());
-        // float x = mCenterX - textWidth / 2;
-        float y = mCenterY - (mValuePaint.descent() + mValuePaint.ascent()) / 2;
-        canvas.drawText(String.format(mPrecisionFormat, mValue), mCenterX, y, mValuePaint);
+        // float x = mCenterPoint.x - textWidth / 2;
+        float y = mCenterPoint.y - (mValuePaint.descent() + mValuePaint.ascent()) / 2;
+        canvas.drawText(String.format(mPrecisionFormat, mValue), mCenterPoint.x, y, mValuePaint);
 
         if (mHint != null) {
-            float hy = mCenterY * 2 / 3 - (mHintPaint.descent() + mHintPaint.ascent()) / 2;
-            canvas.drawText(mHint.toString(), mCenterX, hy, mHintPaint);
+            float hy = mCenterPoint.y * 2 / 3 - (mHintPaint.descent() + mHintPaint.ascent()) / 2;
+            canvas.drawText(mHint.toString(), mCenterPoint.x, hy, mHintPaint);
         }
 
         if (mUnit != null) {
-            float uy = mCenterY * 4 / 3 - (mUnitPaint.descent() + mUnitPaint.ascent()) / 2;
-            canvas.drawText(mUnit.toString(), mCenterX, uy, mUnitPaint);
+            float uy = mCenterPoint.y * 4 / 3 - (mUnitPaint.descent() + mUnitPaint.ascent()) / 2;
+            canvas.drawText(mUnit.toString(), mCenterPoint.x, uy, mUnitPaint);
         }
     }
 
@@ -246,7 +260,7 @@ public class CircleProgress extends View {
         // 从进度圆弧结束的地方开始重新绘制，优化性能
         canvas.save();
         float currentAngle = mSweepAngle * mPercent;
-        canvas.rotate(mStartAngle, mCenterX, mCenterY);
+        canvas.rotate(mStartAngle, mCenterPoint.x, mCenterPoint.y);
         canvas.drawArc(mRectF, currentAngle, mSweepAngle - currentAngle + 2, false, mBgArcPaint);
         // 第一个参数 oval 为 RectF 类型，即圆弧显示区域
         // startAngle 和 sweepAngle  均为 float 类型，分别表示圆弧起始角度和圆弧度数
@@ -262,7 +276,7 @@ public class CircleProgress extends View {
      */
     private void updateArcPaint() {
         // 设置渐变
-        mSweepGradient = new SweepGradient(mCenterX, mCenterY, mGradientColors, null);
+        mSweepGradient = new SweepGradient(mCenterPoint.x, mCenterPoint.y, mGradientColors, null);
         mArcPaint.setShader(mSweepGradient);
     }
 

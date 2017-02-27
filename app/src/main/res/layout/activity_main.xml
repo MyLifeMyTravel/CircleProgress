@@ -12,6 +12,22 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <com.littlejie.app.MyView
+            android:layout_width="300dp"
+            android:layout_height="300dp" />
+
+        <com.littlejie.circleprogress.WaveProgress
+            android:id="@+id/wave_progress_bar"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:layout_gravity="center_horizontal"
+            app:darkWaveAnimTime="1000"
+            app:darkWaveColor="@color/dark"
+            app:lightWaveAnimTime="2000"
+            app:lightWaveColor="@color/light"
+            app:waveHeight="50dp"
+            app:waveNum="1" />
+
         <Button
             android:id="@+id/btn_reset_all"
             android:layout_width="match_parent"
