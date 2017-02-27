@@ -25,7 +25,8 @@
             app:darkWaveColor="@color/dark"
             app:lightWaveAnimTime="2000"
             app:lightWaveColor="@color/light"
-            app:waveHeight="50dp"
+            app:lightWaveDirect="L2R"
+            app:waveHeight="30dp"
             app:waveNum="1" />
 
         <Button

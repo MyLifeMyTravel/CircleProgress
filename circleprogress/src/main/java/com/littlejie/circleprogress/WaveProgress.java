@@ -29,6 +29,10 @@ public class WaveProgress extends View {
 
     private static final String TAG = WaveProgress.class.getSimpleName();
 
+    //浅色波浪方向
+    private static final int L2R = 0;
+    private static final int R2L = 1;
+
     private int mDefaultSize;
     //圆心
     private Point mCenterPoint;
@@ -37,9 +41,11 @@ public class WaveProgress extends View {
     //圆的外接矩形
     private RectF mRectF;
     //深色波浪移动距离
-    private float mDarkWaveMoving;
+    private float mDarkWaveOffset;
     //浅色波浪移动距离
-    private float mLightWaveMoving;
+    private float mLightWaveOffset;
+    //浅色波浪方向
+    private boolean isR2L;
 
     //是否开启抗锯齿
     private boolean antiAlias;
@@ -60,20 +66,16 @@ public class WaveProgress extends View {
     private int mBgCircleColor;
 
     //水波路径
+    private Path mWaveLimitPath;
     private Path mWavePath;
-    private Path mDarkWavePath;
-    private Path mLightWavePath;
     //水波高度
     private float mWaveHeight;
     //水波数量
     private int mWaveNum;
     //深色水波
-    private Paint mDarkWavePaint;
+    private Paint mWavePaint;
     //深色水波颜色
     private int mDarkWaveColor;
-
-    //浅色水波
-    private Paint mLightWavePaint;
     //浅色水波颜色
     private int mLightWaveColor;
 
@@ -127,6 +129,8 @@ public class WaveProgress extends View {
         mLightWaveColor = typedArray.getColor(R.styleable.WaveProgress_lightWaveColor,
                 getResources().getColor(android.R.color.holo_green_light));
 
+        isR2L = typedArray.getInt(R.styleable.WaveProgress_lightWaveDirect, R2L) == R2L;
+
         typedArray.recycle();
     }
 
@@ -137,21 +141,14 @@ public class WaveProgress extends View {
         mCirclePaint.setStyle(Paint.Style.STROKE);
         mCirclePaint.setStrokeCap(Paint.Cap.ROUND);
 
-        mDarkWavePaint = new Paint();
-        mDarkWavePaint.setAntiAlias(antiAlias);
-        mDarkWavePaint.setStyle(Paint.Style.FILL);
-        mDarkWavePaint.setColor(mDarkWaveColor);
-
-        mLightWavePaint = new Paint();
-        mLightWavePaint.setAntiAlias(antiAlias);
-        mLightWavePaint.setStyle(Paint.Style.FILL);
-        mLightWavePaint.setColor(mLightWaveColor);
+        mWavePaint = new Paint();
+        mWavePaint.setAntiAlias(antiAlias);
+        mWavePaint.setStyle(Paint.Style.FILL);
     }
 
     private void initPath() {
+        mWaveLimitPath = new Path();
         mWavePath = new Path();
-        mDarkWavePath = new Path();
-        mLightWavePath = new Path();
     }
 
     @Override
@@ -188,22 +185,23 @@ public class WaveProgress extends View {
         float waveWidth = (mRadius * 2) / mWaveNum;
         mAllPointCount = 8 * mWaveNum + 1;
         mHalfPointCount = mAllPointCount / 2;
-        mDarkPoints = getPointFromLeft2Right(waveWidth);
-        mLightPoints = getPointFromRight2Left(waveWidth);
+        mDarkPoints = getPoint(false, waveWidth);
+        mLightPoints = getPoint(isR2L, waveWidth);
     }
 
     /**
-     * 从左往右获取贝塞尔点
+     * 从左往右或者从右往左获取贝塞尔点
      *
      * @return
      */
-    private Point[] getPointFromLeft2Right(float waveWidth) {
+    private Point[] getPoint(boolean isR2L, float waveWidth) {
         Point[] points = new Point[mAllPointCount];
         //第1个点特殊处理
-        points[mHalfPointCount] = new Point((int) (mCenterPoint.x - mRadius), mCenterPoint.y);
+        points[mHalfPointCount] = new Point((int) (mCenterPoint.x + (isR2L ? mRadius : -mRadius)), mCenterPoint.y);
         //屏幕内的贝塞尔曲线点
         for (int i = mHalfPointCount + 1; i < mAllPointCount; i += 4) {
-            float width = waveWidth * (i / 4 - 1);
+            float width = isR2L ? mCenterPoint.x + mRadius + waveWidth * (i / 4 - 1)
+                    : waveWidth * (i / 4 - 1);
             points[i] = new Point((int) (waveWidth / 4 + width), (int) (mCenterPoint.y - mWaveHeight));
             points[i + 1] = new Point((int) (waveWidth / 2 + width), mCenterPoint.y);
             points[i + 2] = new Point((int) (waveWidth * 3 / 4 + width), (int) (mCenterPoint.y + mWaveHeight));
@@ -212,36 +210,11 @@ public class WaveProgress extends View {
         //屏幕外的贝塞尔曲线点
         for (int i = 0; i < mHalfPointCount; i++) {
             int reverse = mAllPointCount - i - 1;
-            points[i] = new Point(points[mHalfPointCount].x - points[reverse].x,
+            points[i] = new Point((isR2L ? 2 : 1) * points[mHalfPointCount].x - points[reverse].x,
                     points[mHalfPointCount].y * 2 - points[reverse].y);
         }
-        return points;
-    }
-
-    /**
-     * 从右往左获取贝塞尔点
-     *
-     * @return
-     */
-    private Point[] getPointFromRight2Left(float waveWidth) {
-        Point[] points = new Point[mAllPointCount];
-        //第1个点特殊处理
-        points[mHalfPointCount] = new Point((int) (mCenterPoint.x + mRadius), mCenterPoint.y);
-        //屏幕内的贝塞尔曲线点
-        for (int i = mHalfPointCount + 1; i < mAllPointCount; i += 4) {
-            float width = mCenterPoint.x + mRadius + waveWidth * (i / 4 - 1);
-            points[i] = new Point((int) (waveWidth / 4 + width), (int) (mCenterPoint.y - mWaveHeight));
-            points[i + 1] = new Point((int) (waveWidth / 2 + width), mCenterPoint.y);
-            points[i + 2] = new Point((int) (waveWidth * 3 / 4 + width), (int) (mCenterPoint.y + mWaveHeight));
-            points[i + 3] = new Point((int) (waveWidth + width), mCenterPoint.y);
-        }
-        //屏幕外的贝塞尔曲线点
-        for (int i = 0; i < mHalfPointCount; i++) {
-            int reverse = mAllPointCount - i - 1;
-            points[i] = new Point(2 * points[mHalfPointCount].x - points[reverse].x,
-                    points[mHalfPointCount].y * 2 - points[reverse].y);
-        }
-        return points;
+        //对从右向左的贝塞尔点数组反序，方便后续处理
+        return isR2L ? MiscUtil.reverse(points) : points;
     }
 
     @Override
@@ -276,20 +249,8 @@ public class WaveProgress extends View {
      * @param canvas
      */
     private void drawDarkWave(Canvas canvas) {
-        mDarkWavePath.reset();
-        //当前波浪位移
-        float waveMoving = mDarkWaveMoving;
-        mDarkWavePath.moveTo(mDarkPoints[0].x + waveMoving, mDarkPoints[0].y);
-
-        for (int i = 1; i < mAllPointCount; i += 2) {
-            mDarkWavePath.quadTo(mDarkPoints[i].x + waveMoving, mDarkPoints[i].y,
-                    mDarkPoints[i + 1].x + waveMoving, mDarkPoints[i + 1].y);
-        }
-        mDarkWavePath.lineTo(mDarkPoints[mAllPointCount - 1].x, mDarkPoints[mAllPointCount - 1].y);
-        mDarkWavePath.lineTo(mDarkPoints[mAllPointCount - 1].x, mDarkPoints[mAllPointCount - 1].y + mRadius);
-        mDarkWavePath.lineTo(mDarkPoints[0].x, mDarkPoints[0].y + mRadius);
-        mDarkWavePath.close();
-        drawWave(canvas, mDarkWavePaint, mDarkWavePath);
+        mWavePaint.setColor(mDarkWaveColor);
+        drawWave(canvas, mWavePaint, mDarkPoints, mDarkWaveOffset);
     }
 
     /**
@@ -298,29 +259,30 @@ public class WaveProgress extends View {
      * @param canvas
      */
     private void drawLightWave(Canvas canvas) {
-        mLightWavePath.reset();
-        //当前波浪位移
-        float waveMoving = mLightWaveMoving;
-        mLightWavePath.moveTo(mLightPoints[mAllPointCount - 1].x - waveMoving, mLightPoints[mAllPointCount - 1].y);
-
-        for (int i = mAllPointCount - 2; i > 0; i -= 2) {
-            mLightWavePath.quadTo(mLightPoints[i].x - waveMoving, mLightPoints[i].y,
-                    mLightPoints[i - 1].x - waveMoving, mLightPoints[i - 1].y);
-        }
-        mLightWavePath.lineTo(mLightPoints[0].x, mLightPoints[0].y);
-        mLightWavePath.lineTo(mLightPoints[0].x, mLightPoints[0].y + mRadius);
-        mLightWavePath.lineTo(mLightPoints[mAllPointCount - 1].x, mLightPoints[mAllPointCount - 1].y + mRadius);
-        mLightWavePath.close();
-        drawWave(canvas, mLightWavePaint, mLightWavePath);
+        mWavePaint.setColor(mLightWaveColor);
+        //从右向左的水波位移应该被减去
+        drawWave(canvas, mWavePaint, mLightPoints, isR2L ? -mLightWaveOffset : mLightWaveOffset);
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    private void drawWave(Canvas canvas, Paint paint, Path path) {
+    private void drawWave(Canvas canvas, Paint paint, Point[] points, float waveOffset) {
+        mWaveLimitPath.reset();
         mWavePath.reset();
-        mWavePath.addCircle(mCenterPoint.x, mCenterPoint.y, mRadius, Path.Direction.CW);
+        //moveTo和lineTo绘制出水波区域矩形
+        mWavePath.moveTo(points[0].x + waveOffset, points[0].y);
+
+        for (int i = 1; i < mAllPointCount; i += 2) {
+            mWavePath.quadTo(points[i].x + waveOffset, points[i].y,
+                    points[i + 1].x + waveOffset, points[i + 1].y);
+        }
+        mWavePath.lineTo(points[mAllPointCount - 1].x, points[mAllPointCount - 1].y);
+        mWavePath.lineTo(points[mAllPointCount - 1].x, points[mAllPointCount - 1].y + mRadius);
+        mWavePath.lineTo(points[0].x, points[0].y + mRadius);
+        mWavePath.close();
+        mWaveLimitPath.addCircle(mCenterPoint.x, mCenterPoint.y, mRadius, Path.Direction.CW);
         //取该圆与波浪路径的交集，形成波浪在圆内的效果
-        mWavePath.op(path, Path.Op.INTERSECT);
-        canvas.drawPath(mWavePath, paint);
+        mWaveLimitPath.op(mWavePath, Path.Op.INTERSECT);
+        canvas.drawPath(mWaveLimitPath, paint);
     }
 
     public float getMaxValue() {
@@ -387,14 +349,14 @@ public class WaveProgress extends View {
         mLightWaveAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                mLightWaveMoving = (float) animation.getAnimatedValue();
+                mLightWaveOffset = (float) animation.getAnimatedValue();
                 postInvalidate();
             }
         });
         mLightWaveAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
-                mLightWaveMoving = 0;
+                mLightWaveOffset = 0;
             }
 
             @Override
@@ -423,14 +385,14 @@ public class WaveProgress extends View {
         mDarkWaveAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                mDarkWaveMoving = (float) animation.getAnimatedValue();
+                mDarkWaveOffset = (float) animation.getAnimatedValue();
                 postInvalidate();
             }
         });
         mDarkWaveAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
-                mDarkWaveMoving = 0;
+                mDarkWaveOffset = 0;
             }
 
             @Override

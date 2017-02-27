@@ -103,9 +103,11 @@
         <attr name="circleColor" format="color|reference" />
         <!-- 背景圆环颜色 -->
         <attr name="bgCircleColor" format="color|reference" />
+        <!-- 锁定水波不随圆环进度改变，默认锁定在50%处 -->
+        <attr name="lockWave" format="boolean" />
         <!-- 水波数量 -->
         <attr name="waveNum" format="integer" />
-        <!-- 水波高度 -->
+        <!-- 水波高度，峰值和谷值之和 -->
         <attr name="waveHeight" format="dimension" />
         <!-- 深色水波颜色 -->
         <attr name="darkWaveColor" format="color|reference" />
@@ -113,9 +115,10 @@
         <attr name="showLightWave" format="boolean" />
         <!-- 浅色水波颜色 -->
         <attr name="lightWaveColor" format="color|reference" />
-        <!--<attr name="direction" format="enum">-->
-            <!--<enum name="left2right" value="L2R" />-->
-            <!--<enum name="right2left" value="R2L" />-->
-        <!--</attr>-->
+        <!-- 浅色水波的方向 -->
+        <attr name="lightWaveDirect" format="enum">
+            <enum name="L2R" value="0" />
+            <enum name="R2L" value="1" />
+        </attr>
     </declare-styleable>
 </resources>
