@@ -27,6 +27,8 @@
     <attr name="bgArcColor" format="color|reference" />
     <!-- 圆弧宽度 -->
     <attr name="arcWidth" format="dimension" />
+    <!-- 圆弧颜色， -->
+    <attr name="arcColors" format="color|reference" />
 
     <!-- 圆形进度条 -->
     <declare-styleable name="CircleProgressBar">
@@ -47,12 +49,9 @@
         <attr name="unit" />
         <attr name="unitSize" />
         <attr name="unitColor" />
-        <!-- 圆弧颜色，设置多个可实现渐变 -->
-        <attr name="arcColor1" />
-        <attr name="arcColor2" />
-        <attr name="arcColor3" />
         <!-- 圆弧宽度 -->
         <attr name="arcWidth" />
+        <attr name="arcColors" />
         <!-- 背景圆弧颜色 -->
         <attr name="bgArcColor" />
         <!-- 背景圆弧宽度 -->
@@ -79,10 +78,8 @@
         <attr name="dialWidth" format="dimension|reference" />
         <!-- 刻度之间的间隔 -->
         <attr name="dialIntervalDegree" format="integer" />
-        <!-- 圆弧颜色，设置多个可实现渐变 -->
-        <attr name="arcColor1" />
-        <attr name="arcColor2" />
-        <attr name="arcColor3" />
+        <!-- 圆弧颜色， -->
+        <attr name="arcColors" />
         <!-- 背景圆弧线颜色 -->
         <attr name="bgArcColor" />
         <!-- 刻度线颜色 -->

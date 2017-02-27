@@ -80,11 +80,12 @@
 
         <com.littlejie.circleprogress.DialProgress
             android:id="@+id/dial_progress_bar"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
             android:layout_gravity="center_horizontal"
             android:padding="@dimen/medium"
             app:animTime="1000"
+            app:arcColors="@array/gradient_arc_color"
             app:arcWidth="@dimen/large"
             app:dialIntervalDegree="3"
             app:dialWidth="2dp"

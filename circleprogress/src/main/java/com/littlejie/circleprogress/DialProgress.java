@@ -2,6 +2,7 @@ package com.littlejie.circleprogress;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -43,7 +44,6 @@ public class DialProgress extends View {
     private CharSequence mUnit;
     //前景圆弧
     private Paint mArcPaint;
-    private int mArcColor1, mArcColor2, mArcColor3;
     private float mArcWidth;
     private int mDialIntervalDegree;
     private float mStartAngle, mSweepAngle;
@@ -67,7 +67,6 @@ public class DialProgress extends View {
     private int mDialColor;
 
     private int mDefaultSize;
-    private int[] mLocationOnScreen = new int[2];
 
     public DialProgress(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -78,7 +77,6 @@ public class DialProgress extends View {
         mContext = context;
         mDefaultSize = MiscUtil.dipToPx(context, 150);
         mRectF = new RectF();
-        getLocationOnScreen(mLocationOnScreen);
         initConfig(context, attrs);
         initPaint();
         setValue(mValue);
@@ -102,10 +100,6 @@ public class DialProgress extends View {
         mUnitColor = typedArray.getColor(R.styleable.DialProgress_unitColor, Color.BLACK);
 
         mArcWidth = typedArray.getDimension(R.styleable.DialProgress_arcWidth, Constant.DEFAULT_ARC_WIDTH);
-        mArcColor1 = typedArray.getColor(R.styleable.DialProgress_arcColor1, Color.GREEN);
-        mArcColor2 = typedArray.getColor(R.styleable.DialProgress_arcColor2, Color.YELLOW);
-        mArcColor3 = typedArray.getColor(R.styleable.DialProgress_arcColor3, Color.RED);
-        mGradientColors = new int[]{mArcColor1, mArcColor2, mArcColor3};
 
         mStartAngle = typedArray.getFloat(R.styleable.DialProgress_startAngle, Constant.DEFAULT_START_ANGLE);
         mSweepAngle = typedArray.getFloat(R.styleable.DialProgress_sweepAngle, Constant.DEFAULT_SWEEP_ANGLE);
@@ -116,6 +110,26 @@ public class DialProgress extends View {
         mDialWidth = typedArray.getDimension(R.styleable.DialProgress_dialWidth, 2);
         mDialColor = typedArray.getColor(R.styleable.DialProgress_dialColor, Color.WHITE);
 
+        int gradientArcColors = typedArray.getResourceId(R.styleable.DialProgress_arcColors, 0);
+        if (gradientArcColors != 0) {
+            try {
+                int[] gradientColors = getResources().getIntArray(gradientArcColors);
+                if (gradientColors.length == 0) {
+                    int color = getResources().getColor(gradientArcColors);
+                    mGradientColors = new int[2];
+                    mGradientColors[0] = color;
+                    mGradientColors[1] = color;
+                } else if (gradientColors.length == 1) {
+                    mGradientColors = new int[2];
+                    mGradientColors[0] = gradientColors[0];
+                    mGradientColors[1] = gradientColors[0];
+                } else {
+                    mGradientColors = gradientColors;
+                }
+            } catch (Resources.NotFoundException e) {
+                throw new Resources.NotFoundException("the give resource not found.");
+            }
+        }
         typedArray.recycle();
     }
 
@@ -265,6 +279,10 @@ public class DialProgress extends View {
             }
         });
         mAnimator.start();
+    }
+
+    public int[] getGradientColors() {
+        return mGradientColors;
     }
 
     public void setGradientColors(int[] gradientColors) {

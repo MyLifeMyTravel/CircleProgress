@@ -56,11 +56,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mCircleProgress2.setValue(mRandom.nextFloat() * mCircleProgress2.getMaxValue());
                 break;
             case R.id.circle_progress_bar3:
+                //在代码中动态改变渐变色，可能会导致颜色跳跃
                 mCircleProgress3.setGradientColors(COLORS);
                 mCircleProgress3.setValue(mRandom.nextFloat() * mCircleProgress3.getMaxValue());
                 break;
             case R.id.dial_progress_bar:
-                mDialProgress.setGradientColors(new int[]{Color.GREEN, Color.YELLOW, Color.RED, Color.RED});
                 mDialProgress.setValue(mRandom.nextFloat() * mDialProgress.getMaxValue());
                 break;
         }

@@ -2,6 +2,7 @@ package com.littlejie.circleprogress;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -51,7 +52,6 @@ public class CircleProgress extends View {
 
     //绘制圆弧
     private Paint mArcPaint;
-    private int mArcColor1, mArcColor2, mArcColor3;
     private float mArcWidth;
     private float mStartAngle, mSweepAngle;
     private RectF mRectF;
@@ -72,8 +72,6 @@ public class CircleProgress extends View {
 
     //圆心坐标，半径
     private float mCenterX, mCenterY, mRadius;
-    //在屏幕上的坐标
-    private int[] mLocationOnScreen = new int[2];
 
     public CircleProgress(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -84,7 +82,6 @@ public class CircleProgress extends View {
         mContext = context;
         mDefaultSize = MiscUtil.dipToPx(mContext, 150);
         mAnimator = new ValueAnimator();
-        getLocationOnScreen(mLocationOnScreen);
         mRectF = new RectF();
         initAttrs(attrs);
         initPaint();
@@ -112,12 +109,6 @@ public class CircleProgress extends View {
         mUnitColor = typedArray.getColor(R.styleable.CircleProgressBar_unitColor, Color.BLACK);
         mUnitSize = typedArray.getDimension(R.styleable.CircleProgressBar_unitSize, Constant.DEFAULT_UNIT_SIZE);
 
-        // 设置渐变色
-        mArcColor1 = typedArray.getColor(R.styleable.CircleProgressBar_arcColor1, Color.GREEN);
-        mArcColor2 = typedArray.getColor(R.styleable.CircleProgressBar_arcColor2, Color.YELLOW);
-        mArcColor3 = typedArray.getColor(R.styleable.CircleProgressBar_arcColor3, Color.RED);
-        mGradientColors = new int[]{mArcColor1, mArcColor2, mArcColor3};
-
         mArcWidth = typedArray.getDimension(R.styleable.CircleProgressBar_arcWidth, Constant.DEFAULT_ARC_WIDTH);
         mStartAngle = typedArray.getFloat(R.styleable.CircleProgressBar_startAngle, Constant.DEFAULT_START_ANGLE);
         mSweepAngle = typedArray.getFloat(R.styleable.CircleProgressBar_sweepAngle, Constant.DEFAULT_SWEEP_ANGLE);
@@ -127,6 +118,27 @@ public class CircleProgress extends View {
 
         //mPercent = typedArray.getFloat(R.styleable.CircleProgressBar_percent, 0);
         mAnimTime = typedArray.getInt(R.styleable.CircleProgressBar_animTime, Constant.DEFAULT_ANIM_TIME);
+
+        int gradientArcColors = typedArray.getResourceId(R.styleable.CircleProgressBar_arcColors, 0);
+        if (gradientArcColors != 0) {
+            try {
+                int[] gradientColors = getResources().getIntArray(gradientArcColors);
+                if (gradientColors.length == 0) {
+                    int color = getResources().getColor(gradientArcColors);
+                    mGradientColors = new int[2];
+                    mGradientColors[0] = color;
+                    mGradientColors[1] = color;
+                } else if (gradientColors.length == 1) {
+                    mGradientColors = new int[2];
+                    mGradientColors[0] = gradientColors[0];
+                    mGradientColors[1] = gradientColors[0];
+                } else {
+                    mGradientColors = gradientColors;
+                }
+            } catch (Resources.NotFoundException e) {
+                throw new Resources.NotFoundException("the give resource not found.");
+            }
+        }
 
         typedArray.recycle();
     }
