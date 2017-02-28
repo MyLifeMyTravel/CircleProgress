@@ -33,7 +33,7 @@ public class CircleProgress extends View {
     private int mDefaultSize;
     //是否开启抗锯齿
     private boolean antiAlias;
-    //绘制标题
+    //绘制提示
     private TextPaint mHintPaint;
     private CharSequence mHint;
     private int mHintColor;

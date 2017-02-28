@@ -15,6 +15,10 @@
     <attr name="unit" format="string|reference" />
     <attr name="unitSize" format="dimension" />
     <attr name="unitColor" format="color|reference" />
+    <!-- 绘制内容相应的提示语 -->
+    <attr name="hint" format="string|reference" />
+    <attr name="hintSize" format="dimension" />
+    <attr name="hintColor" format="color|reference" />
     <!-- 精度，默认为0 -->
     <attr name="precision" format="integer" />
     <attr name="valueSize" format="dimension" />
@@ -42,9 +46,9 @@
         <attr name="valueSize" />
         <attr name="valueColor" />
         <!-- 绘制内容相应的提示语 -->
-        <attr name="hint" format="string|reference" />
-        <attr name="hintSize" format="dimension" />
-        <attr name="hintColor" format="color|reference" />
+        <attr name="hint" />
+        <attr name="hintSize" />
+        <attr name="hintColor" />
         <!-- 绘制内容的单位 -->
         <attr name="unit" />
         <attr name="unitSize" />
@@ -72,6 +76,10 @@
         <attr name="unit" />
         <attr name="unitSize" />
         <attr name="unitColor" />
+        <!-- 绘制内容相应的提示语 -->
+        <attr name="hint" />
+        <attr name="hintSize" />
+        <attr name="hintColor" />
         <!-- 圆弧的宽度 -->
         <attr name="arcWidth" />
         <!-- 刻度的宽度 -->
@@ -97,6 +105,12 @@
         <attr name="maxValue" />
         <!-- 当前值 -->
         <attr name="value" />
+        <attr name="valueColor" />
+        <attr name="valueSize" />
+        <!-- 绘制内容相应的提示语 -->
+        <attr name="hint" />
+        <attr name="hintSize" />
+        <attr name="hintColor" />
         <!-- 圆环宽度 -->
         <attr name="circleWidth" format="dimension" />
         <!-- 圆环颜色 -->

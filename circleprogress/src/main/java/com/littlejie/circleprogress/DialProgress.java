@@ -11,6 +11,7 @@ import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.SweepGradient;
 import android.graphics.Typeface;
+import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -33,6 +34,12 @@ public class DialProgress extends View {
     private float mRadius;
 
     private boolean antiAlias;
+    //绘制提示
+    private TextPaint mHintPaint;
+    private CharSequence mHint;
+    private int mHintColor;
+    private float mHintSize;
+
     //绘制数值
     private Paint mValuePaint;
     private int mValueColor;
@@ -102,7 +109,10 @@ public class DialProgress extends View {
         mUnit = typedArray.getString(R.styleable.DialProgress_unit);
         mUnitColor = typedArray.getColor(R.styleable.DialProgress_unitColor, Color.BLACK);
         mUnitSize = typedArray.getDimension(R.styleable.DialProgress_unitSize, Constant.DEFAULT_UNIT_SIZE);
-        mUnitColor = typedArray.getColor(R.styleable.DialProgress_unitColor, Color.BLACK);
+
+        mHint = typedArray.getString(R.styleable.DialProgress_hint);
+        mHintColor = typedArray.getColor(R.styleable.DialProgress_hintColor, Color.BLACK);
+        mHintSize = typedArray.getDimension(R.styleable.DialProgress_hintSize, Constant.DEFAULT_HINT_SIZE);
 
         mArcWidth = typedArray.getDimension(R.styleable.DialProgress_arcWidth, Constant.DEFAULT_ARC_WIDTH);
 
@@ -139,6 +149,16 @@ public class DialProgress extends View {
     }
 
     private void initPaint() {
+        mHintPaint = new TextPaint();
+        // 设置抗锯齿,会消耗较大资源，绘制图形速度会变慢。
+        mHintPaint.setAntiAlias(antiAlias);
+        // 设置绘制文字大小
+        mHintPaint.setTextSize(mHintSize);
+        // 设置画笔颜色
+        mHintPaint.setColor(mHintColor);
+        // 从中间向两边绘制，不需要再次计算文字
+        mHintPaint.setTextAlign(Paint.Align.CENTER);
+
         mValuePaint = new Paint();
         mValuePaint.setAntiAlias(antiAlias);
         mValuePaint.setTextSize(mValueSize);
@@ -251,6 +271,11 @@ public class DialProgress extends View {
         if (mUnit != null) {
             float uy = mCenterPoint.y * 4 / 3 - (mUnitPaint.descent() + mUnitPaint.ascent()) / 2;
             canvas.drawText(mUnit.toString(), mCenterPoint.x, uy, mUnitPaint);
+        }
+
+        if (mHint != null) {
+            float hy = mCenterPoint.y * 2 / 3 - (mHintPaint.descent() + mHintPaint.ascent()) / 2;
+            canvas.drawText(mHint.toString(), mCenterPoint.x, hy, mHintPaint);
         }
     }
 

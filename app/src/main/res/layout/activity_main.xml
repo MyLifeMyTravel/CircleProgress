@@ -12,23 +12,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <com.littlejie.app.MyView
-            android:layout_width="300dp"
-            android:layout_height="300dp" />
-
-        <com.littlejie.circleprogress.WaveProgress
-            android:id="@+id/wave_progress_bar"
-            android:layout_width="300dp"
-            android:layout_height="300dp"
-            android:layout_gravity="center_horizontal"
-            app:darkWaveAnimTime="1000"
-            app:darkWaveColor="@color/dark"
-            app:lightWaveAnimTime="2000"
-            app:lightWaveColor="@color/light"
-            app:lightWaveDirect="L2R"
-            app:waveHeight="30dp"
-            app:waveNum="1" />
-
         <Button
             android:id="@+id/btn_reset_all"
             android:layout_width="match_parent"
@@ -106,6 +89,8 @@
             app:arcWidth="@dimen/large"
             app:dialIntervalDegree="3"
             app:dialWidth="2dp"
+            app:hint="当前时速"
+            app:hintSize="@dimen/text_size_25"
             app:maxValue="300"
             app:startAngle="135"
             app:sweepAngle="270"
@@ -114,5 +99,20 @@
             app:value="300"
             app:valueSize="@dimen/text_size_35" />
 
+        <com.littlejie.circleprogress.WaveProgress
+            android:id="@+id/wave_progress_bar"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:layout_gravity="center_horizontal"
+            app:darkWaveAnimTime="1000"
+            app:darkWaveColor="@color/dark"
+            app:lightWaveAnimTime="2000"
+            app:lightWaveColor="@color/light"
+            app:lightWaveDirect="R2L"
+            app:lockWave="true"
+            app:valueColor="@color/colorAccent"
+            app:valueSize="@dimen/text_size_35"
+            app:waveHeight="30dp"
+            app:waveNum="1" />
     </LinearLayout>
 </ScrollView>

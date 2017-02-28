@@ -68,7 +68,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mDialProgress.setValue(mRandom.nextFloat() * mDialProgress.getMaxValue());
                 break;
             case R.id.wave_progress_bar:
-                mWaveProgress.startWaveAnimator();
                 mWaveProgress.setValue(mRandom.nextFloat() * mWaveProgress.getMaxValue());
                 break;
         }

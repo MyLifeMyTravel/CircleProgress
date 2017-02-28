@@ -12,6 +12,7 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.RectF;
 import android.os.Build;
+import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -46,6 +47,8 @@ public class WaveProgress extends View {
     private float mLightWaveOffset;
     //浅色波浪方向
     private boolean isR2L;
+    //是否锁定波浪不随进度移动
+    private boolean lockWave;
 
     //是否开启抗锯齿
     private boolean antiAlias;
@@ -55,6 +58,16 @@ public class WaveProgress extends View {
     private float mValue;
     //当前进度
     private float mPercent;
+
+    //绘制提示
+    private TextPaint mHintPaint;
+    private CharSequence mHint;
+    private int mHintColor;
+    private float mHintSize;
+
+    private Paint mPercentPaint;
+    private float mValueSize;
+    private int mValueColor;
 
     //圆环宽度
     private float mCircleWidth;
@@ -117,6 +130,12 @@ public class WaveProgress extends View {
         mLightWaveAnimTime = typedArray.getInt(R.styleable.WaveProgress_lightWaveAnimTime, Constant.DEFAULT_ANIM_TIME);
         mMaxValue = typedArray.getFloat(R.styleable.WaveProgress_maxValue, Constant.DEFAULT_MAX_VALUE);
         mValue = typedArray.getFloat(R.styleable.WaveProgress_value, Constant.DEFAULT_VALUE);
+        mValueSize = typedArray.getDimension(R.styleable.WaveProgress_valueSize, Constant.DEFAULT_VALUE_SIZE);
+        mValueColor = typedArray.getColor(R.styleable.WaveProgress_valueColor, Color.WHITE);
+
+        mHint = typedArray.getString(R.styleable.WaveProgress_hint);
+        mHintColor = typedArray.getColor(R.styleable.WaveProgress_hintColor, Color.BLACK);
+        mHintSize = typedArray.getDimension(R.styleable.WaveProgress_hintSize, Constant.DEFAULT_HINT_SIZE);
 
         mCircleWidth = typedArray.getDimension(R.styleable.WaveProgress_circleWidth, Constant.DEFAULT_ARC_WIDTH);
         mCircleColor = typedArray.getColor(R.styleable.WaveProgress_circleColor, Color.GREEN);
@@ -130,11 +149,22 @@ public class WaveProgress extends View {
                 getResources().getColor(android.R.color.holo_green_light));
 
         isR2L = typedArray.getInt(R.styleable.WaveProgress_lightWaveDirect, R2L) == R2L;
+        lockWave = typedArray.getBoolean(R.styleable.WaveProgress_lockWave, false);
 
         typedArray.recycle();
     }
 
     private void initPaint() {
+        mHintPaint = new TextPaint();
+        // 设置抗锯齿,会消耗较大资源，绘制图形速度会变慢。
+        mHintPaint.setAntiAlias(antiAlias);
+        // 设置绘制文字大小
+        mHintPaint.setTextSize(mHintSize);
+        // 设置画笔颜色
+        mHintPaint.setColor(mHintColor);
+        // 从中间向两边绘制，不需要再次计算文字
+        mHintPaint.setTextAlign(Paint.Align.CENTER);
+
         mCirclePaint = new Paint();
         mCirclePaint.setAntiAlias(antiAlias);
         mCirclePaint.setStrokeWidth(mCircleWidth);
@@ -144,6 +174,12 @@ public class WaveProgress extends View {
         mWavePaint = new Paint();
         mWavePaint.setAntiAlias(antiAlias);
         mWavePaint.setStyle(Paint.Style.FILL);
+
+        mPercentPaint = new Paint();
+        mPercentPaint.setTextAlign(Paint.Align.CENTER);
+        mPercentPaint.setAntiAlias(antiAlias);
+        mPercentPaint.setColor(mValueColor);
+        mPercentPaint.setTextSize(mValueSize);
     }
 
     private void initPath() {
@@ -177,6 +213,8 @@ public class WaveProgress extends View {
                 + ";圆半径 = " + mRadius
                 + ";圆的外接矩形 = " + mRectF.toString());
         initWavePoints();
+        //开始动画
+        setValue(mValue);
         startWaveAnimator();
     }
 
@@ -200,8 +238,7 @@ public class WaveProgress extends View {
         points[mHalfPointCount] = new Point((int) (mCenterPoint.x + (isR2L ? mRadius : -mRadius)), mCenterPoint.y);
         //屏幕内的贝塞尔曲线点
         for (int i = mHalfPointCount + 1; i < mAllPointCount; i += 4) {
-            float width = isR2L ? mCenterPoint.x + mRadius + waveWidth * (i / 4 - 1)
-                    : waveWidth * (i / 4 - 1);
+            float width = points[mHalfPointCount].x + waveWidth * (i / 4 - 1);
             points[i] = new Point((int) (waveWidth / 4 + width), (int) (mCenterPoint.y - mWaveHeight));
             points[i + 1] = new Point((int) (waveWidth / 2 + width), mCenterPoint.y);
             points[i + 2] = new Point((int) (waveWidth * 3 / 4 + width), (int) (mCenterPoint.y + mWaveHeight));
@@ -223,6 +260,7 @@ public class WaveProgress extends View {
         drawCircle(canvas);
         drawLightWave(canvas);
         drawDarkWave(canvas);
+        drawProgress(canvas);
     }
 
     /**
@@ -233,13 +271,13 @@ public class WaveProgress extends View {
     private void drawCircle(Canvas canvas) {
         canvas.save();
         canvas.rotate(270, mCenterPoint.x, mCenterPoint.y);
-        float currentAngle = 360 * mPercent;
+        int currentAngle = (int) (360 * mPercent);
+        //画背景圆环
+        mCirclePaint.setColor(mBgCircleColor);
+        canvas.drawArc(mRectF, currentAngle, 360 - currentAngle, false, mCirclePaint);
         //画圆环
         mCirclePaint.setColor(mCircleColor);
         canvas.drawArc(mRectF, 0, currentAngle, false, mCirclePaint);
-        //画背景圆环
-        mCirclePaint.setColor(mBgCircleColor);
-        canvas.drawArc(mRectF, currentAngle, 360, false, mCirclePaint);
         canvas.restore();
     }
 
@@ -268,21 +306,33 @@ public class WaveProgress extends View {
     private void drawWave(Canvas canvas, Paint paint, Point[] points, float waveOffset) {
         mWaveLimitPath.reset();
         mWavePath.reset();
+        float height = lockWave ? 0 : mRadius - 2 * mRadius * mPercent;
         //moveTo和lineTo绘制出水波区域矩形
-        mWavePath.moveTo(points[0].x + waveOffset, points[0].y);
+        mWavePath.moveTo(points[0].x + waveOffset, points[0].y + height);
 
         for (int i = 1; i < mAllPointCount; i += 2) {
-            mWavePath.quadTo(points[i].x + waveOffset, points[i].y,
-                    points[i + 1].x + waveOffset, points[i + 1].y);
+            mWavePath.quadTo(points[i].x + waveOffset, points[i].y + height,
+                    points[i + 1].x + waveOffset, points[i + 1].y + height);
         }
-        mWavePath.lineTo(points[mAllPointCount - 1].x, points[mAllPointCount - 1].y);
-        mWavePath.lineTo(points[mAllPointCount - 1].x, points[mAllPointCount - 1].y + mRadius);
-        mWavePath.lineTo(points[0].x, points[0].y + mRadius);
+        mWavePath.lineTo(points[mAllPointCount - 1].x, points[mAllPointCount - 1].y + height);
+        //不管如何移动，波浪与圆路径的交集底部永远固定，否则会造成上移的时候底部为空的情况
+        mWavePath.lineTo(points[mAllPointCount - 1].x, mCenterPoint.y + mRadius);
+        mWavePath.lineTo(points[0].x, mCenterPoint.y + mRadius);
         mWavePath.close();
         mWaveLimitPath.addCircle(mCenterPoint.x, mCenterPoint.y, mRadius, Path.Direction.CW);
         //取该圆与波浪路径的交集，形成波浪在圆内的效果
         mWaveLimitPath.op(mWavePath, Path.Op.INTERSECT);
         canvas.drawPath(mWaveLimitPath, paint);
+    }
+
+    private void drawProgress(Canvas canvas) {
+        float y = mCenterPoint.y - (mPercentPaint.descent() + mPercentPaint.ascent()) / 2;
+        canvas.drawText(String.format("%.0f%%", mPercent * 100), mCenterPoint.x, y, mPercentPaint);
+
+        if (mHint != null) {
+            float hy = mCenterPoint.y * 2 / 3 - (mHintPaint.descent() + mHintPaint.ascent()) / 2;
+            canvas.drawText(mHint.toString(), mCenterPoint.x, hy, mHintPaint);
+        }
     }
 
     public float getMaxValue() {
@@ -307,13 +357,18 @@ public class WaveProgress extends View {
         startAnimator(start, end, mDarkWaveAnimTime);
     }
 
-    private void startAnimator(float start, float end, long animTime) {
+    private void startAnimator(final float start, float end, long animTime) {
         mProgressAnimator = ValueAnimator.ofFloat(start, end);
         mProgressAnimator.setDuration(animTime);
         mProgressAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 mPercent = (float) animation.getAnimatedValue();
+                if (mPercent == 0.0f || mPercent == 1.0f) {
+                    stopWaveAnimator();
+                } else {
+                    startWaveAnimator();
+                }
                 mValue = mPercent * mMaxValue;
                 if (BuildConfig.DEBUG) {
                     Log.d(TAG, "onAnimationUpdate: percent = " + mPercent
@@ -325,12 +380,12 @@ public class WaveProgress extends View {
         mProgressAnimator.start();
     }
 
-    public void startWaveAnimator() {
+    private void startWaveAnimator() {
         startLightWaveAnimator();
         startDarkWaveAnimator();
     }
 
-    public void stopWaveAnimator() {
+    private void stopWaveAnimator() {
         if (mDarkWaveAnimator != null && mDarkWaveAnimator.isRunning()) {
             mDarkWaveAnimator.cancel();
             mDarkWaveAnimator = null;
@@ -342,6 +397,9 @@ public class WaveProgress extends View {
     }
 
     private void startLightWaveAnimator() {
+        if (mLightWaveAnimator != null && mLightWaveAnimator.isRunning()) {
+            return;
+        }
         mLightWaveAnimator = ValueAnimator.ofFloat(0, 2 * mRadius);
         mLightWaveAnimator.setDuration(mLightWaveAnimTime);
         mLightWaveAnimator.setRepeatCount(ValueAnimator.INFINITE);
@@ -378,6 +436,9 @@ public class WaveProgress extends View {
     }
 
     private void startDarkWaveAnimator() {
+        if (mDarkWaveAnimator != null && mDarkWaveAnimator.isRunning()) {
+            return;
+        }
         mDarkWaveAnimator = ValueAnimator.ofFloat(0, 2 * mRadius);
         mDarkWaveAnimator.setDuration(mDarkWaveAnimTime);
         mDarkWaveAnimator.setRepeatCount(ValueAnimator.INFINITE);
