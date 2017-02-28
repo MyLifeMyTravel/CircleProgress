@@ -9,6 +9,7 @@
         <item>@color/green</item>
         <item>@color/blue</item>
         <item>@color/red</item>
+        <item>@color/red</item>
     </integer-array>
 
 </resources>

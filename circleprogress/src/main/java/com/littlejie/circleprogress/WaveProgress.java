@@ -238,7 +238,7 @@ public class WaveProgress extends View {
         points[mHalfPointCount] = new Point((int) (mCenterPoint.x + (isR2L ? mRadius : -mRadius)), mCenterPoint.y);
         //屏幕内的贝塞尔曲线点
         for (int i = mHalfPointCount + 1; i < mAllPointCount; i += 4) {
-            float width = points[mHalfPointCount].x + waveWidth * (i / 4 - 1);
+            float width = points[mHalfPointCount].x + waveWidth * (i / 4 - mWaveNum);
             points[i] = new Point((int) (waveWidth / 4 + width), (int) (mCenterPoint.y - mWaveHeight));
             points[i + 1] = new Point((int) (waveWidth / 2 + width), mCenterPoint.y);
             points[i + 2] = new Point((int) (waveWidth * 3 / 4 + width), (int) (mCenterPoint.y + mWaveHeight));
