@@ -106,7 +106,7 @@
             app:lightWaveAnimTime="2000"
             app:lightWaveColor="@color/light"
             app:lightWaveDirect="R2L"
-            app:lockWave="true"
+            app:lockWave="false"
             app:valueColor="@color/colorAccent"
             app:valueSize="@dimen/text_size_35"
             app:waveHeight="30dp"

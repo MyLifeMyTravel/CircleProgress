@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="green">@android:color/holo_green_light</color>
-    <color name="blue">@android:color/holo_blue_light</color>
-    <color name="red">@android:color/holo_red_light</color>
+    <color name="green">#00FF00</color>
+    <color name="blue">#EE9A00</color>
+    <color name="red">#EE0000</color>
 
     <integer-array name="gradient_arc_color">
         <item>@color/green</item>
         <item>@color/blue</item>
-        <item>@color/red</item>
         <item>@color/red</item>
     </integer-array>
 
