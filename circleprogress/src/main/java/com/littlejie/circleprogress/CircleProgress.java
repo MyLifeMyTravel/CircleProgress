@@ -38,17 +38,20 @@ public class CircleProgress extends View {
     private CharSequence mHint;
     private int mHintColor;
     private float mHintSize;
+    private float mHintOffset;
 
     //绘制单位
     private TextPaint mUnitPaint;
     private CharSequence mUnit;
     private int mUnitColor;
     private float mUnitSize;
+    private float mUnitOffset;
 
     //绘制数值
     private TextPaint mValuePaint;
     private float mValue;
     private float mMaxValue;
+    private float mValueOffset;
     private int mPrecision;
     private String mPrecisionFormat;
     private int mValueColor;
@@ -218,6 +221,12 @@ public class CircleProgress extends View {
         mRectF.top = mCenterPoint.y - mRadius - maxArcWidth / 2;
         mRectF.right = mCenterPoint.x + mRadius + maxArcWidth / 2;
         mRectF.bottom = mCenterPoint.y + mRadius + maxArcWidth / 2;
+        //计算文字绘制时的 baseline
+        //由于文字的baseline、descent、ascent等属性只与textSize和typeface有关，所以此时可以直接计算
+        //若value、hint、unit由同一个画笔绘制或者需要动态设置文字的大小，则需要在每次更新后再次计算
+        mValueOffset = mCenterPoint.y - (mValuePaint.descent() + mValuePaint.ascent()) / 2;
+        mHintOffset = mCenterPoint.y * 2 / 3 - (mHintPaint.descent() + mHintPaint.ascent()) / 2;
+        mUnitOffset = mCenterPoint.y * 4 / 3 - (mUnitPaint.descent() + mUnitPaint.ascent()) / 2;
         updateArcPaint();
         Log.d(TAG, "onSizeChanged: 控件大小 = " + "(" + w + ", " + h + ")"
                 + "圆心坐标 = " + mCenterPoint.toString()
@@ -241,17 +250,14 @@ public class CircleProgress extends View {
         // 计算文字宽度，由于Paint已设置为居中绘制，故此处不需要重新计算
         // float textWidth = mValuePaint.measureText(mValue.toString());
         // float x = mCenterPoint.x - textWidth / 2;
-        float y = mCenterPoint.y - (mValuePaint.descent() + mValuePaint.ascent()) / 2;
-        canvas.drawText(String.format(mPrecisionFormat, mValue), mCenterPoint.x, y, mValuePaint);
+        canvas.drawText(String.format(mPrecisionFormat, mValue), mCenterPoint.x, mValueOffset, mValuePaint);
 
         if (mHint != null) {
-            float hy = mCenterPoint.y * 2 / 3 - (mHintPaint.descent() + mHintPaint.ascent()) / 2;
-            canvas.drawText(mHint.toString(), mCenterPoint.x, hy, mHintPaint);
+            canvas.drawText(mHint.toString(), mCenterPoint.x, mHintOffset, mHintPaint);
         }
 
         if (mUnit != null) {
-            float uy = mCenterPoint.y * 4 / 3 - (mUnitPaint.descent() + mUnitPaint.ascent()) / 2;
-            canvas.drawText(mUnit.toString(), mCenterPoint.x, uy, mUnitPaint);
+            canvas.drawText(mUnit.toString(), mCenterPoint.x, mUnitOffset, mUnitPaint);
         }
     }
 
@@ -276,6 +282,7 @@ public class CircleProgress extends View {
      */
     private void updateArcPaint() {
         // 设置渐变
+        int[] mGradientColors = {Color.GREEN, Color.YELLOW, Color.RED};
         mSweepGradient = new SweepGradient(mCenterPoint.x, mCenterPoint.y, mGradientColors, null);
         mArcPaint.setShader(mSweepGradient);
     }
