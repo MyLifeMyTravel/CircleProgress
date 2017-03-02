@@ -10,7 +10,7 @@ Android 自定义圆形进度条，包括传统传统的圆形(CircleProgress)�
 关于圆形进度条的总结请见：[Android 自定义圆形进度条总结](http://www.jianshu.com/p/5cec84ea08d3)
 
 ## XML 配置
-关于 XML 的配置请见 circleprogress module 下的 attrs.xml 文件
+关于 XML 的配置请见 circleprogress module 下的 [attrs.xml](circleprogress/src/main/res/values/attrs.xml) 文件
 
 ## 联系方式
 邮箱:1025263614lsj@gmail.com
