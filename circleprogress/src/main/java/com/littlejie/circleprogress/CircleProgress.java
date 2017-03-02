@@ -132,12 +132,12 @@ public class CircleProgress extends View {
         if (gradientArcColors != 0) {
             try {
                 int[] gradientColors = getResources().getIntArray(gradientArcColors);
-                if (gradientColors.length == 0) {
+                if (gradientColors.length == 0) {//如果渐变色为数组为0，则尝试以单色读取色值
                     int color = getResources().getColor(gradientArcColors);
                     mGradientColors = new int[2];
                     mGradientColors[0] = color;
                     mGradientColors[1] = color;
-                } else if (gradientColors.length == 1) {
+                } else if (gradientColors.length == 1) {//如果渐变数组只有一种颜色，默认设为两种相同颜色
                     mGradientColors = new int[2];
                     mGradientColors[0] = gradientColors[0];
                     mGradientColors[1] = gradientColors[0];

@@ -107,9 +107,9 @@
             app:lightWaveColor="@color/light"
             app:lightWaveDirect="R2L"
             app:lockWave="false"
-            app:valueColor="@color/colorAccent"
             app:valueSize="@dimen/text_size_35"
             app:waveHeight="30dp"
             app:waveNum="1" />
+
     </LinearLayout>
 </ScrollView>

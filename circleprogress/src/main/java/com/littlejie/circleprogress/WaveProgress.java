@@ -131,7 +131,7 @@ public class WaveProgress extends View {
         mMaxValue = typedArray.getFloat(R.styleable.WaveProgress_maxValue, Constant.DEFAULT_MAX_VALUE);
         mValue = typedArray.getFloat(R.styleable.WaveProgress_value, Constant.DEFAULT_VALUE);
         mValueSize = typedArray.getDimension(R.styleable.WaveProgress_valueSize, Constant.DEFAULT_VALUE_SIZE);
-        mValueColor = typedArray.getColor(R.styleable.WaveProgress_valueColor, Color.WHITE);
+        mValueColor = typedArray.getColor(R.styleable.WaveProgress_valueColor, Color.BLACK);
 
         mHint = typedArray.getString(R.styleable.WaveProgress_hint);
         mHintColor = typedArray.getColor(R.styleable.WaveProgress_hintColor, Color.BLACK);
@@ -234,7 +234,7 @@ public class WaveProgress extends View {
      */
     private Point[] getPoint(boolean isR2L, float waveWidth) {
         Point[] points = new Point[mAllPointCount];
-        //第1个点特殊处理
+        //第1个点特殊处理，即数组的中点
         points[mHalfPointCount] = new Point((int) (mCenterPoint.x + (isR2L ? mRadius : -mRadius)), mCenterPoint.y);
         //屏幕内的贝塞尔曲线点
         for (int i = mHalfPointCount + 1; i < mAllPointCount; i += 4) {
