@@ -1,6 +1,7 @@
 package com.littlejie.circleprogress.utils;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.view.View;
 
 /**
@@ -68,5 +69,15 @@ public class MiscUtil {
             arrays[length - i - 1] = t;
         }
         return arrays;
+    }
+
+    /**
+     * 测量文字高度
+     * @param paint
+     * @return
+     */
+    public static float measureTextHeight(Paint paint) {
+        Paint.FontMetrics fontMetrics = paint.getFontMetrics();
+        return (Math.abs(fontMetrics.ascent) - fontMetrics.descent);
     }
 }

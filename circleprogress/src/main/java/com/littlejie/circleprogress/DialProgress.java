@@ -32,6 +32,7 @@ public class DialProgress extends View {
     //圆心坐标
     private Point mCenterPoint;
     private float mRadius;
+    private float mTextOffsetPercentInRadius;
 
     private boolean antiAlias;
     //绘制提示
@@ -39,6 +40,7 @@ public class DialProgress extends View {
     private CharSequence mHint;
     private int mHintColor;
     private float mHintSize;
+    private float mHintOffset;
 
     //绘制数值
     private Paint mValuePaint;
@@ -46,12 +48,14 @@ public class DialProgress extends View {
     private float mMaxValue;
     private float mValue;
     private float mValueSize;
+    private float mValueOffset;
     private String mPrecisionFormat;
 
     //绘制单位
     private Paint mUnitPaint;
     private float mUnitSize;
     private int mUnitColor;
+    private float mUnitOffset;
     private CharSequence mUnit;
     //前景圆弧
     private Paint mArcPaint;
@@ -124,6 +128,8 @@ public class DialProgress extends View {
         mBgArcColor = typedArray.getColor(R.styleable.DialProgress_bgArcColor, Color.GRAY);
         mDialWidth = typedArray.getDimension(R.styleable.DialProgress_dialWidth, 2);
         mDialColor = typedArray.getColor(R.styleable.DialProgress_dialColor, Color.WHITE);
+
+        mTextOffsetPercentInRadius = typedArray.getFloat(R.styleable.DialProgress_textOffsetPercentInRadius, 0.33f);
 
         int gradientArcColors = typedArray.getResourceId(R.styleable.DialProgress_arcColors, 0);
         if (gradientArcColors != 0) {
@@ -222,11 +228,20 @@ public class DialProgress extends View {
         mRectF.top = mCenterPoint.y - mRadius - mArcWidth / 2;
         mRectF.right = mCenterPoint.x + mRadius + mArcWidth / 2;
         mRectF.bottom = mCenterPoint.y + mRadius + mArcWidth / 2;
+
+        mValueOffset = mCenterPoint.y + getBaselineOffsetFromY(mValuePaint);
+        mHintOffset = mCenterPoint.y - mRadius * mTextOffsetPercentInRadius + getBaselineOffsetFromY(mHintPaint);
+        mUnitOffset = mCenterPoint.y + mRadius * mTextOffsetPercentInRadius + getBaselineOffsetFromY(mUnitPaint);
+
         updateArcPaint();
         Log.d(TAG, "onMeasure: 控件大小 = " + "(" + getMeasuredWidth() + ", " + getMeasuredHeight() + ")"
                 + ";圆心坐标 = " + mCenterPoint.toString()
                 + ";圆半径 = " + mRadius
                 + ";圆的外接矩形 = " + mRectF.toString());
+    }
+
+    private float getBaselineOffsetFromY(Paint paint) {
+        return MiscUtil.measureTextHeight(paint) / 2;
     }
 
     @Override
@@ -265,17 +280,14 @@ public class DialProgress extends View {
     }
 
     private void drawText(Canvas canvas) {
-        float y = mCenterPoint.y - (mValuePaint.descent() + mValuePaint.ascent()) / 2;
-        canvas.drawText(String.format(mPrecisionFormat, mValue), mCenterPoint.x, y, mValuePaint);
+        canvas.drawText(String.format(mPrecisionFormat, mValue), mCenterPoint.x, mValueOffset, mValuePaint);
 
         if (mUnit != null) {
-            float uy = mCenterPoint.y * 4 / 3 - (mUnitPaint.descent() + mUnitPaint.ascent()) / 2;
-            canvas.drawText(mUnit.toString(), mCenterPoint.x, uy, mUnitPaint);
+            canvas.drawText(mUnit.toString(), mCenterPoint.x, mUnitOffset, mUnitPaint);
         }
 
         if (mHint != null) {
-            float hy = mCenterPoint.y * 2 / 3 - (mHintPaint.descent() + mHintPaint.ascent()) / 2;
-            canvas.drawText(mHint.toString(), mCenterPoint.x, hy, mHintPaint);
+            canvas.drawText(mHint.toString(), mCenterPoint.x, mHintOffset, mHintPaint);
         }
     }
 

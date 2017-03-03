@@ -33,6 +33,8 @@
     <attr name="arcWidth" format="dimension" />
     <!-- 圆弧颜色， -->
     <attr name="arcColors" format="color|reference" />
+    <!-- 文字的偏移量。相对于圆半径而言，默认三分之一 -->
+    <attr name="textOffsetPercentInRadius" format="float" />
 
     <!-- 圆形进度条 -->
     <declare-styleable name="CircleProgressBar">
@@ -45,6 +47,7 @@
         <attr name="precision" />
         <attr name="valueSize" />
         <attr name="valueColor" />
+        <attr name="textOffsetPercentInRadius" />
         <!-- 绘制内容相应的提示语 -->
         <attr name="hint" />
         <attr name="hintSize" />
@@ -72,6 +75,7 @@
         <attr name="precision" />
         <attr name="valueSize" />
         <attr name="valueColor" />
+        <attr name="textOffsetPercentInRadius" />
         <!-- 绘制内容的单位 -->
         <attr name="unit" />
         <attr name="unitSize" />

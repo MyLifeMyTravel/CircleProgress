@@ -80,6 +80,7 @@ public class CircleProgress extends View {
     //圆心坐标，半径
     private Point mCenterPoint;
     private float mRadius;
+    private float mTextOffsetPercentInRadius;
 
     public CircleProgress(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -124,6 +125,7 @@ public class CircleProgress extends View {
 
         mBgArcColor = typedArray.getColor(R.styleable.CircleProgressBar_bgArcColor, Color.WHITE);
         mBgArcWidth = typedArray.getDimension(R.styleable.CircleProgressBar_bgArcWidth, Constant.DEFAULT_ARC_WIDTH);
+        mTextOffsetPercentInRadius = typedArray.getFloat(R.styleable.CircleProgressBar_textOffsetPercentInRadius, 0.33f);
 
         //mPercent = typedArray.getFloat(R.styleable.CircleProgressBar_percent, 0);
         mAnimTime = typedArray.getInt(R.styleable.CircleProgressBar_animTime, Constant.DEFAULT_ANIM_TIME);
@@ -224,14 +226,18 @@ public class CircleProgress extends View {
         //计算文字绘制时的 baseline
         //由于文字的baseline、descent、ascent等属性只与textSize和typeface有关，所以此时可以直接计算
         //若value、hint、unit由同一个画笔绘制或者需要动态设置文字的大小，则需要在每次更新后再次计算
-        mValueOffset = mCenterPoint.y - (mValuePaint.descent() + mValuePaint.ascent()) / 2;
-        mHintOffset = mCenterPoint.y * 2 / 3 - (mHintPaint.descent() + mHintPaint.ascent()) / 2;
-        mUnitOffset = mCenterPoint.y * 4 / 3 - (mUnitPaint.descent() + mUnitPaint.ascent()) / 2;
+        mValueOffset = mCenterPoint.y + getBaselineOffsetFromY(mValuePaint);
+        mHintOffset = mCenterPoint.y - mRadius * mTextOffsetPercentInRadius + getBaselineOffsetFromY(mHintPaint);
+        mUnitOffset = mCenterPoint.y + mRadius * mTextOffsetPercentInRadius + getBaselineOffsetFromY(mUnitPaint);
         updateArcPaint();
         Log.d(TAG, "onSizeChanged: 控件大小 = " + "(" + w + ", " + h + ")"
                 + "圆心坐标 = " + mCenterPoint.toString()
                 + ";圆半径 = " + mRadius
                 + ";圆的外接矩形 = " + mRectF.toString());
+    }
+
+    private float getBaselineOffsetFromY(Paint paint) {
+        return MiscUtil.measureTextHeight(paint) / 2;
     }
 
     @Override
