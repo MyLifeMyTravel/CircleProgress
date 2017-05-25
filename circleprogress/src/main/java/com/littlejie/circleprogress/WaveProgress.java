@@ -354,10 +354,17 @@ public class WaveProgress extends View {
         }
         float start = mPercent;
         float end = value / mMaxValue;
+        Log.d(TAG, "setValue, value = " + value + ";start = " + start + "; end = " + end);
         startAnimator(start, end, mDarkWaveAnimTime);
     }
 
     private void startAnimator(final float start, float end, long animTime) {
+        Log.d(TAG, "startAnimator,value = " + mValue
+                + ";start = " + start + ";end = " + end + ";time = " + animTime);
+        //当start=0且end=0时，不需要启动动画
+        if (start == 0 && end == 0) {
+            return;
+        }
         mProgressAnimator = ValueAnimator.ofFloat(start, end);
         mProgressAnimator.setDuration(animTime);
         mProgressAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
