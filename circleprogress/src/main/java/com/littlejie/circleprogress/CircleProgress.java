@@ -327,7 +327,12 @@ public class CircleProgress extends View {
             value = mMaxValue;
         }
         float start = mPercent;
-        float end = value / mMaxValue;
+        float end;
+        if (value == 0) {
+            end = 1;
+        } else {
+            end = value / mMaxValue;
+        }
         startAnimator(start, end, mAnimTime);
     }
 
