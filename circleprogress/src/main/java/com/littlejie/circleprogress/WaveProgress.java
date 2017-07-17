@@ -325,9 +325,21 @@ public class WaveProgress extends View {
         canvas.drawPath(mWaveLimitPath, paint);
     }
 
+    //前一次绘制时的进度
+    private float mPrePercent;
+    //当前进度值
+    private String mPercentValue;
+
     private void drawProgress(Canvas canvas) {
         float y = mCenterPoint.y - (mPercentPaint.descent() + mPercentPaint.ascent()) / 2;
-        canvas.drawText(String.format("%.0f%%", mPercent * 100), mCenterPoint.x, y, mPercentPaint);
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "mPercent = " + mPercent + "; mPrePercent = " + mPrePercent);
+        }
+        if (mPrePercent == 0.0f || Math.abs(mPercent - mPrePercent) >= 0.01f) {
+            mPercentValue = String.format("%.0f%%", mPercent * 100);
+            mPrePercent = mPercent;
+        }
+        canvas.drawText(mPercentValue, mCenterPoint.x, y, mPercentPaint);
 
         if (mHint != null) {
             float hy = mCenterPoint.y * 2 / 3 - (mHintPaint.descent() + mHintPaint.ascent()) / 2;
@@ -341,6 +353,10 @@ public class WaveProgress extends View {
 
     public void setMaxValue(float maxValue) {
         mMaxValue = maxValue;
+    }
+
+    public float getValue() {
+        return mValue;
     }
 
     /**
@@ -395,10 +411,12 @@ public class WaveProgress extends View {
     private void stopWaveAnimator() {
         if (mDarkWaveAnimator != null && mDarkWaveAnimator.isRunning()) {
             mDarkWaveAnimator.cancel();
+            mDarkWaveAnimator.removeAllUpdateListeners();
             mDarkWaveAnimator = null;
         }
         if (mLightWaveAnimator != null && mLightWaveAnimator.isRunning()) {
             mLightWaveAnimator.cancel();
+            mLightWaveAnimator.removeAllUpdateListeners();
             mLightWaveAnimator = null;
         }
     }
@@ -487,6 +505,8 @@ public class WaveProgress extends View {
         stopWaveAnimator();
         if (mProgressAnimator != null && mProgressAnimator.isRunning()) {
             mProgressAnimator.cancel();
+            mProgressAnimator.removeAllUpdateListeners();
+            mProgressAnimator = null;
         }
     }
 }
