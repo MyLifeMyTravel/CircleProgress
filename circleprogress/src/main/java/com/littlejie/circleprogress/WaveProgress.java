@@ -314,7 +314,7 @@ public class WaveProgress extends View {
             mWavePath.quadTo(points[i].x + waveOffset, points[i].y + height,
                     points[i + 1].x + waveOffset, points[i + 1].y + height);
         }
-        mWavePath.lineTo(points[mAllPointCount - 1].x, points[mAllPointCount - 1].y + height);
+       // mWavePath.lineTo(points[mAllPointCount - 1].x, points[mAllPointCount - 1].y + height);
         //不管如何移动，波浪与圆路径的交集底部永远固定，否则会造成上移的时候底部为空的情况
         mWavePath.lineTo(points[mAllPointCount - 1].x, mCenterPoint.y + mRadius);
         mWavePath.lineTo(points[0].x, mCenterPoint.y + mRadius);
