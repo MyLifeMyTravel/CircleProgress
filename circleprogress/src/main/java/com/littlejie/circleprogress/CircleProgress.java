@@ -288,7 +288,6 @@ public class CircleProgress extends View {
      */
     private void updateArcPaint() {
         // 设置渐变
-        int[] mGradientColors = {Color.GREEN, Color.YELLOW, Color.RED};
         mSweepGradient = new SweepGradient(mCenterPoint.x, mCenterPoint.y, mGradientColors, null);
         mArcPaint.setShader(mSweepGradient);
     }
